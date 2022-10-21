@@ -12,6 +12,7 @@ public class Gun : MonoBehaviour
     public bool allowButtonHold;
     int bulletsLeft, bulletsShot;
     public TextMeshProUGUI text;
+    private PickUpController pickUpController;
 
     //bools 
     bool shooting, readyToShoot, reloading;
@@ -31,6 +32,7 @@ public class Gun : MonoBehaviour
 
     private void Awake()
     {
+        pickUpController = GetComponent<PickUpController>();
         bulletsLeft = magazineSize;
         readyToShoot = true;
 
@@ -42,10 +44,13 @@ public class Gun : MonoBehaviour
         MyInput();
 
         //SetText
+        if (!reloading)
         text.SetText(bulletsLeft + " / " + magazineSize);
     }
     private void MyInput()
     {
+        if (!pickUpController.equipped)
+            return;
         if (allowButtonHold) shooting = Input.GetKey(KeyCode.Mouse0);
         else shooting = Input.GetKeyDown(KeyCode.Mouse0);
 
@@ -65,31 +70,27 @@ public class Gun : MonoBehaviour
         //Spread
         float x = Random.Range(-spread, spread);
         float y = Random.Range(-spread, spread);
-        //Calculate Direction with Spread
-        //Vector3 direction = shootPoint.transform.forward; //+ new Vector3(x, y, 0);
-        //Vector3 worldPoint = shootPoint.TransformPoint(shootPoint.transform.position);
+ 
         bool raySuccess = Physics.Raycast(fpsCam.transform.position, fpsCam.transform.forward, out rayHit, range, gameObject.layer);
         Debug.Log("rayhit "+ rayHit.point);
 
        // Debug.Log("direction"+direction);
 
-       Debug.DrawRay(fpsCam.transform.position, fpsCam.transform.forward);
         if (raySuccess)        
         {
-            //RayCast
-            //Debug.Log(rayHit.collider.name);
-          
-
             if (rayHit.collider.CompareTag("Enemy"))
                 rayHit.collider.GetComponent<Enemy>().TakeDamage(damage);
         }
-        //Debug.Log("hit what?" + rayHit.collider);
-        //ShakeCamera
-        //camShake.Shake(camShakeDuration, camShakeMagnitude);
+        RaycastHit hit;
 
+        if (Physics.Raycast(shootPoint.transform.position, shootPoint.transform.forward, out hit))
+        {
+            GameObject tempBullet = Instantiate(bulletHoleGraphic, hit.point,Quaternion.LookRotation(hit.normal));
+            GameObject tempMuzzleFlash = Instantiate(muzzleFlash, shootPoint.forward, Quaternion.LookRotation(hit.normal));
+            Destroy(tempBullet, 1f);
+            Destroy(tempMuzzleFlash, 1f);
+        }
         //Graphics
-        Instantiate(bulletHoleGraphic, rayHit.point, Quaternion.Euler(0, 180, 0));
-        Instantiate(muzzleFlash, rayHit.point, Quaternion.identity);
 
         bulletsLeft--;
         bulletsShot--;
@@ -107,6 +108,7 @@ public class Gun : MonoBehaviour
     {
         reloading = true;
         Invoke("ReloadFinished", reloadTime);
+        text.SetText("Reloading...");
     }
     private void ReloadFinished()
     {

@@ -15,7 +15,6 @@ public class Grapeling : MonoBehaviour
     public float maxGrappleDistance;
     public float grappleDelayTime;
     public float overShootYAxis;
-
     private Vector3 grapplePoint;
 
     [Header("CoolDown")]
@@ -25,8 +24,8 @@ public class Grapeling : MonoBehaviour
     [Header("Input")]
     public KeyCode grappleKey = KeyCode.Mouse1;
 
-    private bool grappeling;
-
+    public bool grappeling;
+    public GameObject pickupObj;
     private void Start()
     {
         Fpm = GetComponent<FirstPersonMovement>();
@@ -34,10 +33,18 @@ public class Grapeling : MonoBehaviour
 
     private void Update()
     {
-        if (Input.GetKeyDown(grappleKey)) startGrapple();
+
+        if (Input.GetKeyDown(grappleKey))
+        {
+            if (!pickupObj.GetComponent<PickUpController>().equipped)
+                return;
+            StartGrapple();
+        }
 
         if (grappelingCdTimer > 0)
+        {
             grappelingCdTimer -= Time.deltaTime;
+        }
     }
 
     private void LateUpdate()
@@ -45,7 +52,7 @@ public class Grapeling : MonoBehaviour
         if (grappeling)
             lr.SetPosition(0, grappleGunTip.position);
     }
-    private void startGrapple()
+    private void StartGrapple()
     {
         if (grappelingCdTimer > 0) return;
 

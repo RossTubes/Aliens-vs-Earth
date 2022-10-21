@@ -32,7 +32,7 @@ public class FirstPersonMovement : MonoBehaviour
     public float groundDistance = 0.4f;
     public LayerMask groundMask;
 
-    [Header("Ceouching")]
+    [Header("Crouching")]
     public float crouchSpeed;
     public float crouchYscale;
     private float startYscale;

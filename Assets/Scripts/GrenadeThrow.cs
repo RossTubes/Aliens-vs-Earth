@@ -45,7 +45,15 @@ public class GrenadeThrow : MonoBehaviour
             /*if (!isExplosive) //destroyOnHit
                 Invoke(nameof(DestroyProjectile), 0.1f);*/
         }
+        else if (collision.gameObject.GetComponent<FirstPersonMovement>() != null)
+        {
+            FirstPersonMovement firstPersonMovement = collision.gameObject.GetComponent<FirstPersonMovement>();
 
+            firstPersonMovement.TakeDamage(damage);
+
+            // destroy projectile after kill
+            Destroy(gameObject);
+        }
         // explode projectile if it's explosive
         if (isExplosive)
         {

@@ -38,11 +38,14 @@ public class Sliding : MonoBehaviour
         horizontalInput = Input.GetAxisRaw("Horizontal");
         verticalInput = Input.GetAxisRaw("Vertical");
 
-        if (Input.GetKeyDown(slidekey) && (horizontalInput != 0 || verticalInput != 0))
-            StartSlide();
+        if (!gameObject.GetComponentInChildren<Grapeling>().grappeling)
+        {
+            if (Input.GetKeyDown(slidekey) && (horizontalInput != 0 || verticalInput != 0))
+                StartSlide();
 
-        if (Input.GetKeyUp(slidekey) && fp.sliding)
-            StopSlide();
+            if (Input.GetKeyUp(slidekey) && fp.sliding)
+                StopSlide();
+        }
     }
     private void FixedUpdate()
     {
@@ -55,7 +58,7 @@ public class Sliding : MonoBehaviour
         fp.sliding = true;
 
         playerObj.localScale = new Vector3(playerObj.localScale.x, slideYScale, playerObj.localScale.z);
-        rb.AddForce(Vector3.down * 5f, ForceMode.Impulse);
+        rb.AddForce(Vector3.down * 5f, ForceMode.Acceleration);
 
         slideTimer = maxSlideTime;
     }
@@ -65,7 +68,7 @@ public class Sliding : MonoBehaviour
         Vector3 inputDirection = orientation.forward * verticalInput + orientation.right * horizontalInput;
 
         //sliding normal
-        if(!fp.OnSlope() || rb.velocity.y > -0.1f)
+        if (!fp.OnSlope() || rb.velocity.y > -0.1f)
         {
             rb.AddForce(inputDirection.normalized * slideForce, ForceMode.Force);
         }

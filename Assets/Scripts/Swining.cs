@@ -10,16 +10,19 @@ public class Swining : MonoBehaviour
     public Transform gunTip, camera, player;
     public float maxDistance = 100f;
     private SpringJoint joint;
-
+    private PickUpController pickUpController;
     void Awake()
     {
         lr = GetComponent<LineRenderer>();
+        pickUpController = GetComponent<PickUpController>();
     }
 
     void Update()
     {
         if (Input.GetMouseButtonDown(0))
         {
+            if (!pickUpController.equipped)
+                return;
             StartGrapple();
         }
         else if (Input.GetMouseButtonUp(0))
