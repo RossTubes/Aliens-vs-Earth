@@ -9,10 +9,11 @@ public class EnemyAI : MonoBehaviour
 
     public Transform player;
 
-    public LayerMask whatIsGround, whatIsPlayer;
+    public Transform friendly;
+
+    public LayerMask whatIsGround, whatIsPlayer, whatIsFriendly;
     public float throwUpForce;
     public float throwForce;
-    public float health;
 
     //patroling
     public Vector3 walkPoint;
@@ -28,10 +29,12 @@ public class EnemyAI : MonoBehaviour
     //states
     public float sightRange, attackRange;
     public bool playerInSightRange, playerInAttackRange;
+    public bool friendlyInSightRange, friendlyInAttackRange;
 
     private void Start()
     {
         player = GameObject.Find("Player").transform;
+        friendly = GameObject.Find("Friendly").transform;
         agent = GetComponent<NavMeshAgent>();
     }
 
@@ -41,9 +44,17 @@ public class EnemyAI : MonoBehaviour
         playerInSightRange = Physics.CheckSphere(transform.position, sightRange, whatIsPlayer);
         playerInAttackRange = Physics.CheckSphere(transform.position, attackRange, whatIsPlayer);
 
+        friendlyInSightRange = Physics.CheckSphere(transform.position, sightRange, whatIsFriendly);
+        friendlyInAttackRange = Physics.CheckSphere(transform.position, attackRange, whatIsFriendly);
+
         if (!playerInSightRange && !playerInAttackRange) Patroling();
         if (playerInSightRange && !playerInAttackRange) ChasePlayer();
         if (playerInSightRange && playerInAttackRange) AttackPlayer();
+
+        //friendly
+        if (!friendlyInSightRange && !friendlyInAttackRange) Patroling();
+        if (friendlyInSightRange && !friendlyInAttackRange) ChaseFriendly ();
+        if (friendlyInSightRange && friendlyInAttackRange) AttackFriendly ();
     }
     private void Patroling()
     {
@@ -75,12 +86,37 @@ public class EnemyAI : MonoBehaviour
         agent.SetDestination(player.position);
     }
 
+    private void ChaseFriendly()
+    {
+        agent.SetDestination(friendly.position);
+    }
+
     private void AttackPlayer()
     {
         //Make sure enemy doesn't move
         agent.SetDestination(transform.position);
 
         transform.LookAt(player);
+
+        if (!alreadyAttacked)
+        {
+            ///Attack code here
+            Rigidbody rb = Instantiate(projectile, AIShootPoint.position, Quaternion.identity).GetComponent<Rigidbody>();
+            rb.AddForce(transform.forward * throwForce, ForceMode.Impulse);
+            rb.AddForce(transform.up * throwUpForce, ForceMode.Impulse);
+            ///End of attack code
+
+            alreadyAttacked = true;
+            Invoke(nameof(ResetAttack), timeBetweenAttacks);
+        }
+    }
+
+    private void AttackFriendly()
+    {
+        //Make sure enemy doesn't move
+        agent.SetDestination(transform.position);
+
+        transform.LookAt(friendly);
 
         if (!alreadyAttacked)
         {

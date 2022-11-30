@@ -4,6 +4,8 @@ using UnityEngine;
 
 public class FirstPersonMovement : MonoBehaviour
 {
+   // var scriptToControl; FollowPlayer;
+
     [Header("Movement")]
     private float moveSpeed;
     public float walkSpeed;
@@ -80,6 +82,8 @@ public class FirstPersonMovement : MonoBehaviour
     public bool sliding;
     public bool crouching;
     public bool wallrunning;
+
+    [SerializeField] private FollowPlayer followPlayer;
     private void Start()
     {
         rb = GetComponent<Rigidbody>();
@@ -104,6 +108,17 @@ public class FirstPersonMovement : MonoBehaviour
             rb.drag = groundDrag;
         else
             rb.drag = 0;
+
+        {
+            if (Input.GetKeyDown(KeyCode.X))
+            {
+                Debug.Log("User pressed X");
+                if (followPlayer.enabled)
+                    followPlayer.enabled = false;
+                else
+                    followPlayer.enabled = true;
+            }
+        }
     }
 
     private void FixedUpdate()
@@ -119,7 +134,6 @@ public class FirstPersonMovement : MonoBehaviour
         if(Input.GetKey(jumpkey) && readyToJump && grounded)
         {
             readyToJump = false;
-            Debug.Log("jump one");
 
             Jump();
             Debug.Log("jump one");

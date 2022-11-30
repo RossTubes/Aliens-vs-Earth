@@ -27,7 +27,6 @@ public class PickUpController : MonoBehaviour
             slotFull = false;
 
             if (!weaponObj.GetComponent<Swining>() || !weaponObj.GetComponent<Gun>() || !weaponObj.GetComponent<Grapeling>()) 
-                Debug.Log("MONKEEE");
             weaponObj.GetComponent<Swining>().enabled = false;
             weaponObj.GetComponent<Grapeling>().enabled = false;
             weaponObj.GetComponent<Gun>().enabled = false;

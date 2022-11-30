@@ -71,7 +71,7 @@ public class Gun : MonoBehaviour
         float x = Random.Range(-spread, spread);
         float y = Random.Range(-spread, spread);
  
-        bool raySuccess = Physics.Raycast(fpsCam.transform.position, fpsCam.transform.forward, out rayHit, range, gameObject.layer);
+        bool raySuccess = Physics.Raycast(fpsCam.transform.position, fpsCam.transform.forward, out rayHit, range);
         Debug.Log("rayhit "+ rayHit.point);
 
        // Debug.Log("direction"+direction);
