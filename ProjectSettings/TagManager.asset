@@ -8,6 +8,7 @@ TagManager:
   - Friendly
   - enemy
   - Spawn Point
+  - glasses
   layers:
   - Default
   - TransparentFX

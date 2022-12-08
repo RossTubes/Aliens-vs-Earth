@@ -2,6 +2,8 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using Cinemachine;
+using static CamSwitching;
+using Unity.Mathematics;
 
 public class ThirdPersonMovement : MonoBehaviour
 {
@@ -19,8 +21,11 @@ public class ThirdPersonMovement : MonoBehaviour
     //Camera controllers
     public CharacterController Controller;
     public Transform cam;
-   // public Vector3 oldCamPos;
-   // public Quaternion oldCamRot;
+    private CamSwitching camSwitch;
+    public Transform cameraTransform;
+
+    [SerializeField]
+    private float rotationSpeed = .8f;
 
     //characterControls
     public float turnSmoothTime = 0.1f;
@@ -34,46 +39,30 @@ public class ThirdPersonMovement : MonoBehaviour
     public float groundDistance = 0.4f;
     public LayerMask groundMask;
     Vector3 velocity;
-    bool isGrounded;
-
-    //CameraStyles
-  //  public Transform combatLookAt;
-  //  public Transform firstPerson;
-  //  public CameraStyle currentStyle;
-   // public GameObject firstPersonCam;
-   // public GameObject thirdPersonCam;
-  //  public GameObject combatCam;
-   // public GameObject topDownCam;
-
-   /* public enum CameraStyle
-    {
-        Basic,
-        Combat,
-        FirstPerson,
-        TopDown
-    }*/
+    private bool isGrounded;
     private void Start()
     {
+        //makes the mouse invisiable
         Cursor.lockState = CursorLockMode.Locked;
         Cursor.visible = false;
-        //makes the mouse invisiable
+        camSwitch = transform.GetComponent<CamSwitching>();
     }
     void Update()
     {
-        // switch styles
-       // if (Input.GetKeyDown(KeyCode.Z)) SwitchCameraStyle(CameraStyle.Basic);
-       // if (Input.GetKeyDown(KeyCode.X)) SwitchCameraStyle(CameraStyle.Combat);
-       // if (Input.GetKeyDown(KeyCode.T)) SwitchCameraStyle(CameraStyle.TopDown);
-       // if (Input.GetKeyDown(KeyCode.C)) SwitchCameraStyle(CameraStyle.FirstPerson);
-
         float horizontal = Input.GetAxisRaw("Horizontal");
         float vertical = Input.GetAxisRaw("Vertical");
         Vector3 direction = new Vector3(horizontal, 0f, vertical).normalized;
+       // direction = direction.x * cameraTransform.forward.normalized + direction.z * cameraTransform.forward;
+
+        //rotate playerObj to camera view
+        //quaternion rotation = Quaternion.Euler(0, cameraTransform.eulerAngles.y, 0);
+        //transform.rotation = Quaternion.Lerp(transform.rotation, rotation, rotationSpeed * Time.deltaTime);
 
         if (direction.magnitude >= 0.1f)
         {
             float targetAngle = Mathf.Atan2(direction.x, direction.z) * Mathf.Rad2Deg + cam.eulerAngles.y;
             float angle = Mathf.SmoothDampAngle(transform.eulerAngles.y, targetAngle, ref turnSmoothVelocity, turnSmoothTime);
+
             transform.rotation = Quaternion.Euler(0f, angle, 0f);//checks wich way is point 0 degrees to see what is forward
 
             Vector3 moveDir = Quaternion.Euler(0f, targetAngle, 0f) * Vector3.forward;
@@ -83,61 +72,6 @@ public class ThirdPersonMovement : MonoBehaviour
         // rotate orientation
         Vector3 viewDir = player.position - new Vector3(transform.position.x, player.position.y, transform.position.z);
         orientation.forward = viewDir.normalized;
-
-        /*switch (currentStyle)
-        {
-            case CameraStyle.Basic:
-
-                break;
-            case CameraStyle.Combat:
-                break;
-            case CameraStyle.FirstPerson:
-                break;
-            default:
-                break;
-        }*/
-
-        /* if(currentStyle == CameraStyle.Basic)
-         {
-
-
-             else if (currentStyle == CameraStyle.FirstPerson)
-             {
-                 GetComponent<ThirdPersonMovement>().enabled = false;
-                 GetComponent<FirstPerson>().enabled = true;
-                 GetComponent<CharacterController>().enabled = true;
-                 GetComponent<CapsuleCollider>().enabled = true;
-
-
-
-                  Vector3 dirToFirstPersonLookAt = firstPerson.position - new Vector3(transform.position.x, firstPerson.position.y, transform.position.z);
-                  orientation.forward = dirToFirstPersonLookAt.normalized;
-
-                  playerObj.forward = dirToFirstPersonLookAt.normalized;
-
-                  float mouseX = Input.GetAxisRaw("mouse X") * Time.deltaTime * sensX;
-                  float mouseY = Input.GetAxisRaw("mouse Y") * Time.deltaTime * sensY;
-
-                  yRotation += mouseX;
-
-                  xRotation += mouseY;
-                  xRotation = Mathf.Clamp(xRotation, -90, 90f);
-
-                  //rotate cam and rotation
-                  transform.rotation = Quaternion.Euler(xRotation, yRotation, 0);
-                  orientation.rotation = Quaternion.Euler(0, yRotation, 0);
-             }
-         } else if (currentStyle == CameraStyle.Combat)
-             {
-                 GetComponent<ThirdPersonMovement>().enabled = true;
-                 GetComponent<CharacterController>().enabled = true;
-
-                 Vector3 dirToCombatLookAt = combatLookAt.position - new Vector3(transform.position.x, combatLookAt.position.y, transform.position.z);
-                 orientation.forward = dirToCombatLookAt.normalized;
-
-                 playerObj.forward = dirToCombatLookAt.normalized;
-         
-    }*/
 
     //Jumping
     isGrounded = Physics.CheckSphere(groundCheck.position, groundDistance, groundMask);
@@ -153,44 +87,6 @@ public class ThirdPersonMovement : MonoBehaviour
         velocity.y += gravity * Time.deltaTime;
         Controller.Move(velocity * Time.deltaTime);
     }
-
-    /*private void SwitchCameraStyle(CameraStyle newStyle)
-    {
-        combatCam.SetActive(false);
-        topDownCam.SetActive(false);
-        thirdPersonCam.SetActive(false);
-        firstPersonCam.SetActive(false);
-
-        if (newStyle == CameraStyle.Basic)
-        {
-            oldCamPos = thirdPersonCam.transform.position;
-            oldCamRot = thirdPersonCam.transform.rotation;
-            thirdPersonCam.SetActive(true);
-            Debug.Log("3rd Person Cam = " + oldCamPos);
-            Debug.Log("3rd Person Cam Rot = " + oldCamRot);
-        }
-        if (newStyle == CameraStyle.Combat)
-        {
-            thirdPersonCam.transform.position = oldCamPos;
-            thirdPersonCam.transform.rotation = oldCamRot;
-            combatCam.SetActive(true);
-        }
-        if (newStyle == CameraStyle.TopDown)
-        {
-            //thirdPersonCam.transform.position = oldCamPos;
-          //  thirdPersonCam.transform.rotation = oldCamRot;
-            topDownCam.SetActive(true);
-        }
-
-        if (newStyle == CameraStyle.FirstPerson) combatCam.SetActive(false);
-        {
-            
-            firstPersonCam.SetActive(true);
-
-        }
-
-        currentStyle = newStyle;
-    }*/
     private bool IsGrounded()
     {
         RaycastHit hit;

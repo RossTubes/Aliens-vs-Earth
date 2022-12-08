@@ -18,8 +18,15 @@ public class CamSwitching : MonoBehaviour
     public GameObject thirdPersonCam;
     public GameObject combatCam;
     public GameObject topDownCam;
+    public GameObject glasses;
 
     private ThirdPersonMovement _thirdPersonMovement;
+    private CharacterController _characterController;
+    private FirstPersonMovement _firstPersonMovement;
+    private Sliding _sliding;
+    private WallRunning _wallrun;
+    private throwing _throwing;
+    private Grapeling _grapeling;
 
     // Start is called before the first frame update
     public enum CameraStyle
@@ -33,6 +40,13 @@ public class CamSwitching : MonoBehaviour
     private void Awake()
     {
         _thirdPersonMovement = GetComponent<ThirdPersonMovement>();
+        _characterController = GetComponent<CharacterController>();
+        _firstPersonMovement = GetComponent<FirstPersonMovement>();
+        _sliding = GetComponent<Sliding>();
+        _wallrun = GetComponent<WallRunning>();
+        _throwing = GetComponent<throwing>();
+        _grapeling = GetComponent<Grapeling>();
+        glasses = GameObject.FindGameObjectWithTag("glasses");
     }
 
     // Update is called once per frame
@@ -58,15 +72,17 @@ public class CamSwitching : MonoBehaviour
             oldCamPos = thirdPersonCam.transform.position;
             oldCamRot = thirdPersonCam.transform.rotation;
             thirdPersonCam.SetActive(true);
+            Camera.main.orthographic = false;
             _thirdPersonMovement.enabled = true;
-            GetComponent<CharacterController>().enabled = true;
+            _characterController.enabled = true;
+            _firstPersonMovement.enabled = false;
+            
 
-            GetComponent<FirstPersonMovement>().enabled = false;
             GetComponent<CapsuleCollider>().enabled = false;
-            GetComponent<Sliding>().enabled = false;
-            GetComponent<WallRunning>().enabled = false;
-            GetComponent<throwing>().enabled = false;
-            GetComponent<Grapeling>().enabled = false;
+            _sliding.enabled = false;
+            _wallrun.enabled = false;
+            _throwing.enabled = false;
+            _grapeling.enabled = false;
             Debug.Log("3rd Person Cam = " + oldCamPos);
             Debug.Log("3rd Person Cam Rot = " + oldCamRot);
         }
@@ -75,43 +91,52 @@ public class CamSwitching : MonoBehaviour
             thirdPersonCam.transform.position = oldCamPos;
             thirdPersonCam.transform.rotation = oldCamRot;
             combatCam.SetActive(true);
-            GetComponent<ThirdPersonMovement>().enabled = true;
-            GetComponent<CharacterController>().enabled = true;
+            Camera.main.orthographic = false;
+            _thirdPersonMovement.enabled = true;
+            _characterController.enabled = true;
+            _firstPersonMovement.enabled = false;
 
-            GetComponent<FirstPersonMovement>().enabled = false;
+
             GetComponent<CapsuleCollider>().enabled = false;
-            GetComponent<Sliding>().enabled = false;
-            GetComponent<WallRunning>().enabled = false;
-            GetComponent<throwing>().enabled = false;
-            GetComponent<Grapeling>().enabled = false;
+            _sliding.enabled = false;
+            _wallrun.enabled = false;
+            _throwing.enabled = false;
+            _grapeling.enabled = false;
         }
         if (newStyle == CameraStyle.TopDown)
         {
             //thirdPersonCam.transform.position = oldCamPos;
             //  thirdPersonCam.transform.rotation = oldCamRot;
             topDownCam.SetActive(true);
-            GetComponent<ThirdPersonMovement>().enabled = true;
-            GetComponent<CharacterController>().enabled = true;
+            Camera.main.orthographic = true;
+            _thirdPersonMovement.enabled = true;
+            _characterController.enabled = true;
+            _firstPersonMovement.enabled = false;
+            _thirdPersonMovement.enabled = true;
+            _characterController.enabled = true;
+            _firstPersonMovement.enabled = false;
 
-            GetComponent<FirstPersonMovement>().enabled = false;
+
             GetComponent<CapsuleCollider>().enabled = false;
-            GetComponent<Sliding>().enabled = false;
-            GetComponent<WallRunning>().enabled = false;
-            GetComponent<throwing>().enabled = false;
-            GetComponent<Grapeling>().enabled = false;
+            _sliding.enabled = false;
+            _wallrun.enabled = false;
+            _throwing.enabled = false;
+            _grapeling.enabled = false;
         }
 
         if (newStyle == CameraStyle.FirstPerson) 
         {
             firstPersonCam.SetActive(true);
-            GetComponent<ThirdPersonMovement>().enabled = false;
-            GetComponent<CharacterController>().enabled = false;
-            GetComponent<FirstPersonMovement>().enabled = true;
+            Camera.main.orthographic = false;
+            glasses.SetActive(false);
+            _thirdPersonMovement.enabled=false;
+            _characterController.enabled=false;
+            _firstPersonMovement.enabled = true;
             GetComponent<CapsuleCollider>().enabled = true;
-            GetComponent<Sliding>().enabled = true;
-            GetComponent<WallRunning>().enabled = true;
-            GetComponent<throwing>().enabled = true;
-            GetComponent<Grapeling>().enabled = true;
+            _sliding.enabled=true;
+            _wallrun.enabled = true;
+            _throwing.enabled = true;
+            _grapeling.enabled = true;
         }
         currentStyle = newStyle;
     }
